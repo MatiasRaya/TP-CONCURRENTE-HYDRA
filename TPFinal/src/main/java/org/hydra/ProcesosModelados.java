@@ -1,6 +1,7 @@
 package org.hydra;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -13,6 +14,7 @@ public class ProcesosModelados {
     private final List<List<Integer>> plazasTransiciones;
     private final Politicas politicas;
     private final int[] contadorDisparoTransiciones; /*Contador de disparadores por transición*/
+    private Integer counterTotal = 0;
 
     /**
      * Constructor de la clase.
@@ -28,26 +30,13 @@ public class ProcesosModelados {
     }
 
     /**
-     * Simula la realización de una tarea en una plaza de la RdP, simplemente realiza un sleep para
-     *  dormir al hilo durante un tiempo definido y actualiza el contador de disparadores de la transición correspondiente.
+     * Se incrementa el contador del disparo de la transicion
      *
      * @param transicion Transición de entrada a la plaza a simular.
      * @throws RuntimeException Excepción manejada en Disparador
      */
     public void realizeTask(int transicion) throws RuntimeException {
         contadorDisparoTransiciones[transicion]++;
-        /*En caso de transiciones no temporizdas hay que simular el tiempo de tarea*/
-        /*if(transicion == 7 || transicion == 11){
-            return;
-        }
-        try {
-            int minTime = 1;
-            int maxTime = 10;
-            int time = new Random().nextInt(maxTime - minTime + 1) + minTime;
-            TimeUnit.MILLISECONDS.sleep(time);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }*/
     }
 
     /**

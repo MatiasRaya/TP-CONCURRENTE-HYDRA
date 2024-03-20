@@ -78,6 +78,47 @@ public class Inicializador {
         int tamanio = procesosModelados.getRDP().getTotaltransiciones()-2;
         boolean fin = false;
         while (!fin){
+                     fin = true;
+            for(int i=0; i<tamanio; i++){
+                if(procesosModelados.getRDP().disparo(finaltransiciones[i], true)){
+                    procesosModelados.realizeTask(finaltransiciones[i]);
+                    fin = false;
+                }
+            }
+        }
+
+        System.out.printf("Tokens finales %s\n",procesosModelados.getRDP().getTokens());
+        System.out.printf("Contador final de transiciones %s\n", Arrays.toString(procesosModelados.getContadorDisparoTransiciones()));
+        System.out.println("La ejecucion del programa ha finalizado");
+    }
+
+    public void start() throws InterruptedException {
+        List<Thread> disparadores = Arrays.stream(segmentos)
+                .flatMap(this::createShooters)
+                .collect(Collectors.toList());
+        disparadores.parallelStream().forEach(Thread::start);
+    }
+
+    public void finish() throws InterruptedException {
+        List<Thread> disparadores = Arrays.stream(segmentos)
+                .flatMap(this::createShooters)
+                .collect(Collectors.toList());
+        disparadores.parallelStream().forEach(Thread::interrupt);
+
+        try {
+            for(Thread shooter:disparadores){
+                shooter.join();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("El hilo ha sido interrumpido");
+        System.out.println(procesosModelados.getRDP().getTokens());
+        int[] finaltransiciones = {1,2,3,4,5,6,7,9,10,11};
+        int tamanio = procesosModelados.getRDP().getTotaltransiciones()-2;
+        boolean fin = false;
+        while (!fin){
             fin = true;
             for(int i=0; i<tamanio; i++){
                 if(procesosModelados.getRDP().disparo(finaltransiciones[i], true)){

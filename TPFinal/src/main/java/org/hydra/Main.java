@@ -3,6 +3,7 @@ package org.hydra;
 import com.google.common.collect.Iterables;
 import org.hydra.beans.Segmento;
 import org.hydra.beans.VectorSensibilizado;
+import org.hydra.Estadistica;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,8 +17,8 @@ import java.util.List;
  */
 public class Main {
 
-//    private static final int TIEMPO = 65; /*Tiempo de ejecución*/ /* Tiempo de ejecucion en Ubuntu 22.04 */
-    private static final int TIEMPO = 95; /*Tiempo de ejecución*/ /* Tiempo de ejecucion en Windows 11 */
+    private static final int TIEMPO = 1; /*Tiempo de ejecución*/ /* Tiempo de ejecucion en Ubuntu 22.04 */
+//    private static final int TIEMPO = 95; /*Tiempo de ejecución*/ /* Tiempo de ejecucion en Windows 11 */
 
     private static final double[] TOKENSINICIALES = /*Marcado inicial de la red*/
             //           1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
@@ -61,17 +62,32 @@ public class Main {
      * @throws InterruptedException excepción por interrupción
      */
     public static void main(String[] args) throws InterruptedException {
+        long inicio = System.currentTimeMillis();
+
         RDP rdp = new RDP(MATRIZFLUJODATA, TOKENSINICIALES);
         ProcesosModelados procesoModelado = new ProcesosModelados(rdp, plazasTransiciones);
         AdminMonitor monitor = new AdminMonitor(procesoModelado);
         VectorSensibilizado vectorSensibilizado = new VectorSensibilizado(monitor);
         rdp.setVectorSensibilizado(vectorSensibilizado);
         Inicializador initializer = new Inicializador(monitor, segmentos, procesoModelado);
-        initializer.start(TIEMPO);
+
+        Estadistica estadistica = rdp.crearEstadistica();
+
+//        initializer.start(TIEMPO);
+
+        estadistica.setTimeStart();
+
+        initializer.start();
+
+//        estadistica.
+
+        initializer.finish();
+
+        estadistica.setTimeStop();
 
         String path = "../Regex/regex1.py";
-        String[] cmd = {"python",path}; /* Ejecucion del script en Windows 11 */
 //        String[] cmd = {"python3",path}; /* Ejecucion del script en Ubuntu 22.04 */
+        String[] cmd = {"python",path}; /* Ejecucion del script en Windows 11 */
         try {
             Process proceso = Runtime.getRuntime().exec(cmd);
             System.out.println("\nEjecucion de la REGEX");
@@ -84,5 +100,14 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        long fin = System.currentTimeMillis();
+
+        long tiempoTotal = fin - inicio;
+
+        System.out.println("Hora de inicio: " + inicio);
+        System.out.println("Hora al finalizar: " + fin);
+        System.out.println("Tiempo transcurrido (milisegundos): " + tiempoTotal);
+        System.out.println("Tiempo transcurrido (segundos): " + (tiempoTotal / 1000.0));
     }
 }

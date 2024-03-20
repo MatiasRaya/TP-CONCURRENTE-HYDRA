@@ -5,6 +5,7 @@ import org.apache.commons.math.linear.RealMatrix;
 import org.apache.commons.math.linear.RealVector;
 import org.apache.log4j.Logger;
 import org.hydra.beans.VectorSensibilizado;
+import org.hydra.Estadistica;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +20,7 @@ public class RDP {
     private final RealMatrix matrizFlujo;
     private RealVector tokens;
     private VectorSensibilizado vectorSensibilizado;
+    private Estadistica estadistica;
 
     /**
      * Constructor de la clase.
@@ -63,9 +65,10 @@ public class RDP {
         if(vectorSensibilizado.estaSensibilizada(transicion, finalShots)) { /*Transición sensibilizada, se dispara*/
             tokens = tokens.add(matrizFlujo.operate(getTransicion(transicion))); /*Actualiza marcado*/
             String message = String.format("%s. Disparador %s disparo T%s", /*log*/
-                    System.nanoTime(), Thread.currentThread().getName(), (transicion+1));
+                    System.currentTimeMillis(), Thread.currentThread().getName(), (transicion+1));
             LOG.info(message);
             vectorSensibilizado.actualizarTiempoEspera(getSensibilizadas()); /*Actualiza tiempoEsperas*/
+
             return true;
         } else { /*Transición no sensibilizada, no se dispara*/
             return false;
@@ -107,6 +110,17 @@ public class RDP {
      */
     public void setVectorSensibilizado(VectorSensibilizado vectorSensibilizado) {
         this.vectorSensibilizado = vectorSensibilizado;
+    }
+
+    /**
+     * Se crea un elemento de la clase Estadistica
+     *
+     * @return
+     */
+    public Estadistica crearEstadistica() {
+        estadistica = new Estadistica(this);
+
+        return estadistica;
     }
 
     /**
