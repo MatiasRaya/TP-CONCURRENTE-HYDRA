@@ -84,10 +84,18 @@ public class Main {
         initializer.finish();
 
         estadistica.setTimeStop();
+        estadistica.imprimirEstadisticas();
 
+        correrAnalizadorTInvariantes();
+    }
+
+    /**
+     * Funcion que
+     */
+    public static void correrAnalizadorTInvariantes() {
         String path = "../Regex/regex1.py";
-//        String[] cmd = {"python3",path}; /* Ejecucion del script en Ubuntu 22.04 */
-        String[] cmd = {"python",path}; /* Ejecucion del script en Windows 11 */
+        String[] cmd = {"python3",path}; /* Ejecucion del script en Ubuntu 22.04 */
+//        String[] cmd = {"python",path}; /* Ejecucion del script en Windows 11 */
         try {
             Process proceso = Runtime.getRuntime().exec(cmd);
             System.out.println("\nEjecucion de la REGEX");
@@ -96,18 +104,14 @@ public class Main {
             while ((commandRead = stdInput.readLine()) != null)
                 System.out.println(commandRead);
             proceso.destroy();
-            System.out.printf("REGEX termino con el codigo %d",proceso.exitValue());
+            try {
+                proceso.waitFor(); // Espera a que el proceso termine
+                System.out.printf("REGEX termino con el codigo %d", proceso.exitValue());
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        long fin = System.currentTimeMillis();
-
-        long tiempoTotal = fin - inicio;
-
-        System.out.println("Hora de inicio: " + inicio);
-        System.out.println("Hora al finalizar: " + fin);
-        System.out.println("Tiempo transcurrido (milisegundos): " + tiempoTotal);
-        System.out.println("Tiempo transcurrido (segundos): " + (tiempoTotal / 1000.0));
     }
 }
