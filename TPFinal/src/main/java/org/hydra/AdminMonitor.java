@@ -4,15 +4,13 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 
 /**
- * Esta clase representa el monitor de concurrencia que controlará todos los accesos a los
- *  recursos compartidos de la RdP.
+ * Clase que implementa un monitor de concurrencia para el disparo de transiciones en una Red de Petri.
  */
 public class AdminMonitor {
-
-    private final Semaphore mutex = new Semaphore(1); /*Semáforo del monitor*/
+    private final Semaphore mutex = new Semaphore(1);
     private final RDP rdp;
     private final Politicas politicas;
-    private final Colas colaTransicion; /*Cola de espera*/
+    private final Colas colaTransicion;
 
     /**
      * Constructor de la clase.
@@ -20,78 +18,108 @@ public class AdminMonitor {
      * @param procesoModelado proceso modelado por la RdP
      */
     public AdminMonitor(ProcesosModelados procesoModelado) {
+        // Se almacena el puntero de la red en la variable local
         this.rdp = procesoModelado.getRDP();
-        this.politicas = procesoModelado.getPolitics();
+
+        // Se almacena el puntero de la politica en la variable local
+        this.politicas = procesoModelado.getPolitica();
+
+        // Se crea un nuevo elemento de la clase Colas con el total de las transiciones de laa red
         this.colaTransicion = new Colas(rdp.getTotaltransiciones());
     }
 
     /**
-     * Este método modela el diagrama de secuencias de un monitor de concurrencia para el disparo de
-     *  una transición.
+     * Este método modela el diagrama de secuencias de un monitor de concurrencia para el disparo de una transición.
      *
-     * @param transicion transición a disparar
-     * @throws RuntimeException manejada en shooter
+     * @param transicion Transición a disparar
+     * @throws RuntimeException Excepción manejada en shooter
      */
-    public void disparoTransicion(int transicion) throws RuntimeException{
-        /*Intenta tomar el mutex del monitor para poder ingresar.*/
+    public void disparoTransicion(int transicion) throws RuntimeException {
         try {
-            mutex.acquire();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e); /*manejada en el método run del shooter*/
+            // Se intenta tomar el mutex del monitor para poder ingresar
+            this.mutex.acquire();
+        }
+        catch (InterruptedException e) {
+            // Se lanza una excepcion que se resuelve en el run del disparador
+            throw new RuntimeException(e);
         }
 
-        /*En este punto el hilo logró ingresar al monitor.*/
+        // Se declara la variable en true
         boolean k = true;
 
+        // Se ejecuta siempre que el indicador sea verdadero
         while(k) {
             /*En el método disparo de la RdP, si la transición a disparar está sensibilizada por tokens y
              * temporalmente, se dispara y se actualiza el vector de marcado mediante la ecuación
              * fundamental, luego retorna true.
              * Si la transición no se puede disparar se retorna false.
              */
+
+            // Se realiza el disparo de la transicion en la RdP y retorna si fue exitosa o no
             k = rdp.disparo(transicion, false);
 
-            if(k) {/*k = true --> Transición disparada, el hilo dentro del monitor intentará despertar otro*/
-
+            // Se verifica si se pudo disparar la transicion
+            if(k) {
+                // Se obtienen las transiciones sensibilizadas
                 List<Integer> sensibilizado = rdp.getSensibilizadas();
+
+                // Se obtienen las transiciones en espera
                 List<Integer> hilosListos = colaTransicion.getTransicionesEspera();
-                /*Se queda con las transiciones sensibilizadas que tienen hilos esperando para dispararlas*/
+
+                // Se filtran las transiciones sensibilizadas que tienen hilos esperando
                 sensibilizado.retainAll(hilosListos);
 
-                if(sensibilizado.size() > 0) { /*Hay hilos esperando por transiciones sensibilizadas*/
-                    int siguienteTransicion = politicas.getDisparoPrioritario(sensibilizado); /*Consulta a la política cuál hilo despertar*/
-                    colaTransicion.release(siguienteTransicion); /*Despierta el hilo*/
-                    return; /*Deja el monitor sin liberar el mutex, ya que queda el hilo que despertó, no hay owner*/
+                // Se verifica que el listado de hilos sensibilizados no este vacio
+                if (!sensibilizado.isEmpty()) {
+                    // Se determina cual es la siguiente transicion a despertar
+                    int siguienteTransicion = politicas.getDisparoPrioritario(sensibilizado);
 
-                } else { /*No hay hilos esperando por transiciones sensibilizadas*/
-                    k = false; /*Sale del loop*/
+                    // Se despierta el hilo correspondiente
+                    colaTransicion.release(siguienteTransicion);
+
+                    // Se sale del monitor sin liberar el mutex del monitor
+                    return;
+
+                }
+                else {
+                    // Se sale del loop
+                    k = false;
                 }
 
-            } else { /*k = false --> No se puede disparar la transición*/
-                mutex.release(); /*Devuelve el mutex del monitor*/
-                colaTransicion.acquire(transicion); /*Ingresa a la cola de transiciones, acá el hilo se bloquea*/
-                /*Cuando un hilo es despertado de una cola, continua su ejecución en este punto, por lo tanto,
-                 * es necesario colocar k = true para que pueda ingresar nuevamente al loop*/
+            }
+            else {
+                // Se libera el mutex del monitor
+                mutex.release();
+
+                // Se ingresa a la cola de transiciones la transicion y se bloquea el hilo
+                colaTransicion.acquire(transicion);
+
+                // Se continua el loop despues de ser despertado
                 k = true;
             }
         }
-        /*Una vez que abandona el loop, devuelve el mutex del monitor*/
+
+        // Se libera el mutex del monitor al salir del loop
         mutex.release();
     }
 
     /**
      * Retorna la RdP asociada al monitor.
-     * @return instancia de RDP del monitor
+     *
+     * @return Instancia de RDP del monitor
      */
     public RDP getRDP() {
+        // Retorna la instancia de la RdP asociada al monitor
         return rdp;
     }
 
     /**
      * Retorna el semáforo del monitor.
-     * @return mutex
+     *
+     * @return Mutex del monitor
      */
     public Semaphore getMutex() {
+        // Retorna el semáforo (mutex) del monitor
         return mutex;
     }
 }
