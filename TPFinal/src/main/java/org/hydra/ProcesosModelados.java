@@ -1,20 +1,16 @@
 package org.hydra;
 
-
-import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Esta clase modela la actividad que se realiza en las plazas de la RdP. Además, cuenta con
- *  un contador de disparos por transición que será util para las estadísticas de la red.
+ * Clase que modela los procesos de la Red de Petri.
  */
 public class ProcesosModelados {
 
     private final RDP rdp;
     private final List<List<Integer>> plazasTransiciones;
     private final Politicas politicas;
-    private final int[] contadorDisparoTransiciones; /*Contador de disparadores por transición*/
-    private Integer counterTotal = 0;
+    private final int[] contadorDisparoTransiciones;
 
     /**
      * Constructor de la clase.
@@ -23,55 +19,67 @@ public class ProcesosModelados {
      * @param plazasTransiciones Listado de lista de transiciones que representan cada camino productivo de la RdP.
      */
     public ProcesosModelados(RDP rdp, List<List<Integer>> plazasTransiciones) {
+        // Se almacena la RdP pasada como parametro en la variable global
         this.rdp = rdp;
+
+        // Se almacenan los t-invariantes en la variable global
         this.plazasTransiciones = plazasTransiciones;
+
+        // Se inicializa la variable global de la clase Politicas
         this.politicas = new Politicas(this);
-        contadorDisparoTransiciones = new int[rdp.getTotaltransiciones()];
+
+        // Se inicializa el tamaño del contador con la cantidad total de transiciones
+        this.contadorDisparoTransiciones = new int[rdp.getTotaltransiciones()];
     }
 
     /**
-     * Se incrementa el contador del disparo de la transicion
+     * Realiza una tarea específica en el contexto de la simulación de una Red de Petri.
      *
-     * @param transicion Transición de entrada a la plaza a simular.
-     * @throws RuntimeException Excepción manejada en Disparador
+     * @param transicion La transición que se va a realizar.
+     * @throws RuntimeException Si ocurre algún error durante la ejecución de la tarea.
      */
-    public void realizeTask(int transicion) throws RuntimeException {
-        contadorDisparoTransiciones[transicion]++;
+    public void realizarTarea(int transicion) throws RuntimeException {
+        // Incrementa el contador de disparo de la transición especificada
+        this.contadorDisparoTransiciones[transicion]++;
     }
 
     /**
-     * Retorna la RdP asociada.
+     * Retorna la Red de Petri asociada a esta instancia de ProcesosModelados.
      *
-     * @return rdp
+     * @return La Red de Petri asociada.
      */
     public RDP getRDP() {
-        return rdp;
+        // Retorna la instancia de la Red de Petri asociada
+        return this.rdp;
     }
 
     /**
-     * Retorna las transiciones de los caminos de producción de la RdP.
+     * Retorna la lista de transiciones de los caminos de producción de la Red de Petri asociada a esta instancia de ProcesosModelados.
      *
-     * @return plazasTransiciones
+     * @return La lista de transiciones de los caminos de producción.
      */
     public List<List<Integer>> getPlazasTransiciones() {
-        return plazasTransiciones;
+        // Retorna la lista de transiciones de los caminos de producción
+        return this.plazasTransiciones;
     }
 
     /**
-     * Retorna las políticas aplicadas.
+     * Retorna las políticas aplicadas en la simulación de la Red de Petri asociada a esta instancia de ProcesosModelados.
      *
-     * @return politicas
+     * @return Las políticas aplicadas.
      */
-    public Politicas getPolitics() {
-        return politicas;
+    public Politicas getPolitica() {
+        // Retorna las políticas aplicadas en la simulación
+        return this.politicas;
     }
 
     /**
-     * Retorna el contador de disparadores de transiciones
-     * @return contadorDisparoTransiciones
+     * Retorna el contador de disparos de transiciones en la simulación de la Red de Petri asociada a esta instancia de ProcesosModelados.
+     *
+     * @return El arreglo que contiene el contador de disparos de transiciones.
      */
     public int[] getContadorDisparoTransiciones() {
-        return contadorDisparoTransiciones;
+        // Retorna el contador de disparos de transiciones
+        return this.contadorDisparoTransiciones;
     }
-
 }

@@ -3,9 +3,10 @@ package org.hydra;
 import org.apache.commons.math.linear.MatrixUtils;
 import org.apache.commons.math.linear.RealMatrix;
 import org.apache.commons.math.linear.RealVector;
+
 import org.apache.log4j.Logger;
+
 import org.hydra.beans.VectorSensibilizado;
-import org.hydra.Estadistica;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,7 +21,6 @@ public class RDP {
     private final RealMatrix matrizFlujo;
     private RealVector tokens;
     private VectorSensibilizado vectorSensibilizado;
-    private Estadistica estadistica;
 
     /**
      * Constructor de la clase.
@@ -29,105 +29,129 @@ public class RDP {
      * @param initialTokens marcado inicial de la RdP
      */
     public RDP(double[][] fluxMatrixData, double[] initialTokens) {
+        // Se almacena la matriz de flujo que viene como parametro en la variable global
         matrizFlujo = MatrixUtils.createRealMatrix(fluxMatrixData);
+
+        // Se alamcenan los tokens que vienen como parametro en la variable global
         tokens = MatrixUtils.createRealVector(initialTokens);
     }
 
     /**
-     * Este método retorna un vector que representa a la transición pasada como parámetro. El vector
-     *  contiene todos ceros y un uno en la posición correspondiente a la transición. El tamaño del vector se calcula
-     *  en función de la cantidad total de transiciones (cantidad de columnas de la matriz).
-     * @param i transición a representar
-     * @return datosTransicion
+     * Este método devuelve un vector de transición que representa una transición específica en la red de Petri.
+     * El vector de transición tiene un valor de 1 en la posición correspondiente a la transición especificada,
+     * indicando que esa transición está habilitada, y 0 en todas las demás posiciones.
+     *
+     * @param i Índice de la transición para la cual se creará el vector de transición
+     * @return Vector de transición creado
      */
     private RealVector getTransicion(int i) {
+        // Se crea un array para almacenar los datos del vector de transicion
         double[] datosTransicion = new double[getTotaltransiciones()];
+
+        // Se rellena el array con 0
         Arrays.fill(datosTransicion, 0);
+
+        // Se establece el valor de 1 en la posicion correspondiente a la transicion especificiada
         datosTransicion[i] = 1;
+
+        // Se crea y devuelve un vector real con los datos proporcionados
         return MatrixUtils.createRealVector(datosTransicion);
     }
 
     /**
-     * Realiza el disparo de transiciones (en exclusión mutua, ya que se llama desde adentro del monitor).
-     *  Primero obtiene las transiciones sensibilizadas y actualiza el vector de sensibilizado. Luego utiliza un método
-     *  definido en dicho vector, para saber si la transición puede ser disparada o no.
-     *  Si la transición a disparar está sensibilizada entonces la dispara, actualiza el vector de marcado con
-     *  la ecuación fundamental e imprime un mensaje en pantalla (también lo guarda en el log).
-     *  Finalmente, actualiza los tiempos relacionados con las transiciones.
+     * Este método intenta disparar una transición en la red de Petri. Si la transición está sensibilizada,
+     * se dispara, actualizando el marcado y registrando el evento en el registro. Si la transición no está
+     * sensibilizada, no se dispara y el método devuelve false.
      *
-     * @param transicion transición a disparar
-     * @param finalShots disparadores finales para ajustar la red
-     * @return valor boolean de disparo
+     * @param transicion Índice de la transición que se intentará disparar
+     * @param finalShots Indica si se trata de los disparos finales en la simulación
+     * @return true si la transición se disparó exitosamente, false si la transición no estaba sensibilizada
      */
     public boolean disparo(int transicion, boolean finalShots) {
-        vectorSensibilizado.setSensibilizar(getSensibilizadas()); /*Actualiza las transiciones sensibilizadas*/
+        // Se actualiza el vector de las transiciones sensibilizadas
+        this.vectorSensibilizado.setSensibilizar(getSensibilizadas());
 
-        if(vectorSensibilizado.estaSensibilizada(transicion, finalShots)) { /*Transición sensibilizada, se dispara*/
-            tokens = tokens.add(matrizFlujo.operate(getTransicion(transicion))); /*Actualiza marcado*/
-            String message = String.format("%s. Disparador %s disparo T%s", /*log*/
+        boolean retval;
+
+        // Se verifica si la transicion esta sensibilizada
+        if(this.vectorSensibilizado.estaSensibilizada(transicion, finalShots)) {
+            // Se actualiza el marcaco
+            this.tokens = this.tokens.add(this.matrizFlujo.operate(getTransicion(transicion)));
+
+            // Se crea el String para registrar el evento de disparo
+            String message = String.format("%s. Disparador %s disparo T%s",
                     System.currentTimeMillis(), Thread.currentThread().getName(), (transicion+1));
-            LOG.info(message);
-            vectorSensibilizado.actualizarTiempoEspera(getSensibilizadas()); /*Actualiza tiempoEsperas*/
 
-            return true;
-        } else { /*Transición no sensibilizada, no se dispara*/
-            return false;
+            // Se registra el evento de disparo
+            LOG.info(message);
+
+            // Se actualizan los tiempos de espera
+            vectorSensibilizado.actualizarTiempoEspera(getSensibilizadas());
+
+            // Se setea el valor a retornar en true
+            retval = true;
         }
+        else {
+            // Se setea el valor a retornar en false
+            retval = false;
+        }
+
+        // Se retorna el valor del disparo
+        return retval;
     }
 
     /**
-     * Este método retorna una lista con todas las transiciones sensibilizadas al momento de la
-     *  llamada al método. Para verificar si una transición está sensibilizada, verifica que la secuencia de disparo
-     *  de dicha transición (vector con todos ceros y un uno en la transición, generado con el método getTransicion)
-     *  sea una secuencia válida. Utiliza la ecuación fundamental y comprueba que no haya tokens menores a cero.
+     * Este método devuelve una lista de índices de transiciones que están sensibilizadas en la red de Petri
+     * en función del marcado actual y la matriz de flujo.
      *
-     * @return sensibilizado
+     * @return Lista de índices de transiciones sensibilizadas
      */
     public List<Integer> getSensibilizadas() {
+        // Se crea una nueva lista
         List<Integer> sensibilizado = new ArrayList<>();
+
         for(int transicion = 0; transicion < getTotaltransiciones(); transicion++) {
+            // Se calcula cual es el proximo marcado
             RealVector proximoToken = tokens.add(matrizFlujo.operate(getTransicion(transicion)));
+
+            // Se verifica que no haya ningun valor negativo en el arreglo
             if(!Arrays.stream(proximoToken.getData()).filter(val -> val < 0).findAny().isPresent()) {
+                // Se almacena el valor de la transicion en la lista de sensibilizada
                 sensibilizado.add(transicion);
             }
         }
+
+        // Se devuelve la lista de transiciones sensibilizadas
         return sensibilizado;
     }
 
     /**
-     * Retorna la cantidad total de transiciones de la RdP. Calculadas a partir de la cantidad
-     *  de columnas de la matriz de flujo.
+     * Este método devuelve el número total de transiciones en la red de Petri.
      *
-     * @return totaltransiciones
+     * @return Número total de transiciones
      */
     public int getTotaltransiciones() {
+        // Se devuelve la dimenson de columnas de la matriz de flujo, que representa el numero total de transiciones
         return matrizFlujo.getColumnDimension();
     }
 
     /**
-     * Proporciona a la red una instancia del vector de sensibilizados.
-     * @param vectorSensibilizado vector de sensibilizados
+     * Este método establece el objeto VectorSensibilizado asociado a la red de Petri.
+     *
+     * @param vectorSensibilizado Objeto VectorSensibilizado a establecer
      */
     public void setVectorSensibilizado(VectorSensibilizado vectorSensibilizado) {
+        // Se asigna el objeto vectorSensibilizado pasado coo parametro a la variable global
         this.vectorSensibilizado = vectorSensibilizado;
     }
 
     /**
-     * Se crea un elemento de la clase Estadistica
+     * Este método devuelve el vector de marcado actual de la red de Petri.
      *
-     * @return
-     */
-    public Estadistica crearEstadistica() {
-        estadistica = new Estadistica(this);
-
-        return estadistica;
-    }
-
-    /**
-     * Retorna el vector de marcado de la red.
-     * @return vector de marcado de la red
+     * @return Vector de marcado actual
      */
     public RealVector getTokens() {
-        return tokens;
+        // Se retorna el tokens de marcado
+        return this.tokens;
     }
 }
