@@ -1,15 +1,12 @@
 package org.hydra;
 
-
 import java.util.Iterator;
 
-
 /**
- * Representa a los trabajadores de la línea de producción, cada shooter tendrá un segmento asociado.
- * Implementa la interfaz Runnable Estos objetos serán utilizados para crear los hilos de ejecución.
+ * Clase que implementa la interfaz Runnable para realizar el disparo de transiciones y la realización de tareas
+ * en la simulación de una Red de Petri.
  */
 public class Disparador implements Runnable {
-
     private final AdminMonitor monitor;
     private final Iterator<Integer> transiciones;
     private final ProcesosModelados procesoModelado;
@@ -23,28 +20,42 @@ public class Disparador implements Runnable {
      * @param procesoModelado Proceso modelado de la RdP
      */
     public Disparador(AdminMonitor monitor, Iterator<Integer> transiciones, ProcesosModelados procesoModelado) {
+        // Se almacena el monitor pasado como parametro en la variable global
         this.monitor = monitor;
+
+        // Se almacenan las transiciones pasadas como parametro en la variable global
         this.transiciones = transiciones;
+
+        // Se almaccena el procesmo modelado pasado como parametro en la variable global
         this.procesoModelado = procesoModelado;
     }
 
     /**
-     * Método que ejecuta el disparo de transiciones y la realización de tareas. Es importante destacar que
-     *  el disparo de la transición ocurre en exclusión mutua debido a que este método pertenece al monitor y la
-     *  realización de las tareas puede ocurrir de manera concurrente, ya que los recursos ya fueron asignados.
-     *  Los hilos se encontrarán en ejecución hasta que sean interrumpidos y se complete un ciclo completo de
-     *  producción (no pueden quedar ciclos incompletos al fin).
+     * Método que ejecuta el disparo de transiciones y la realización de tareas.
+     * El disparo de la transición ocurre en exclusión mutua, mientras que la realización de las tareas puede ocurrir
+     * de manera concurrente, ya que los recursos ya fueron asignados. Los hilos se ejecutarán hasta ser interrumpidos
+     * y se complete un ciclo completo de producción.
      */
     @Override
     public void run() {
-        int currentTransition = transiciones.next();
-        while(!(estaInterrumpido)) {
+        // Se obtiene la siguiente transicion de la lista
+        int currentTransition = this.transiciones.next();
+
+        // Se itera siempre que no se haya interrumpido el hilo
+        while(!(this.estaInterrumpido)) {
             try {
-                monitor.disparoTransicion(currentTransition);
-                procesoModelado.realizeTask(currentTransition);
-                currentTransition = transiciones.next();
-            } catch (RuntimeException e) {
-                estaInterrumpido = true;
+                // Se realiza el disparo de la transicion en el monitor
+                this.monitor.disparoTransicion(currentTransition);
+
+                // Se realiza la tarea asociada a la transicion del disparo
+                this.procesoModelado.realizarTarea(currentTransition);
+
+                // Se obtiene la siguiente transicion de la lista
+                currentTransition = this.transiciones.next();
+            }
+            catch (RuntimeException e) {
+                //Se marca el hilo como interrumpido
+                this.estaInterrumpido = true;
             }
         }
     }
