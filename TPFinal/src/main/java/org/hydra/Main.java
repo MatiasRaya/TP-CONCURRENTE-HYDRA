@@ -93,8 +93,8 @@ public class Main {
         // que modela la red
         Inicializador initializer = new Inicializador(monitor, segmentos, procesoModelado);
 
-        // Se crea un nuevo elemento de Estadistica con la lista de t-invariantes
-        Estadistica estadistica = new Estadistica(plazasTransiciones);
+        // Se crea un nueva instancia de la clase Estadistica
+        Estadistica estadistica = rdp.crearEstadistica(plazasTransiciones);
 
         // Se llama al metodo para registrar el tiempo de inicio
         estadistica.setTimeStart();
@@ -134,7 +134,7 @@ public class Main {
             Process proceso = Runtime.getRuntime().exec(cmd);
 
             // Se imprime por consola que se termino la ejecucion de la REGEX
-            System.out.println("\nEjecucion de la REGEX");
+            System.out.println("Ejecucion de la REGEX");
 
             String commandRead;
 
@@ -159,19 +159,13 @@ public class Main {
                 System.out.printf("REGEX termino con el codigo %d\n", proceso.exitValue());
             }
             catch (InterruptedException e) {
-                // Se crea un elemento de la clase Logger
-                Logger logger = Logger.getLogger(Main.class);
-
-                // Se almacena en el log que se produjo una excepcion al tratar de finalizar el proceso
-                logger.error("Se produjo una excepción al tratar de finalizar el proceso:", e);
+                // Se imprime el error
+                e.printStackTrace();
             }
         }
         catch (IOException e) {
-            // Se crea un elemento de la clase Logger
-            Logger logger = Logger.getLogger(Main.class);
-
-            // Se almacena en el log que se produjo una excepcion al tratar de ejecutar el comando
-            logger.error("Se produjo una excepción al ejecutar el comando:", e);
+            // Se imprime el error
+            e.printStackTrace();
         }
     }
 }
