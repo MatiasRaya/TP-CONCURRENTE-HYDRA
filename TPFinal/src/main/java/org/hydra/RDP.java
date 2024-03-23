@@ -21,6 +21,7 @@ public class RDP {
     private final RealMatrix matrizFlujo;
     private RealVector tokens;
     private VectorSensibilizado vectorSensibilizado;
+    private Estadistica estadistica;
 
     /**
      * Constructor de la clase.
@@ -34,6 +35,21 @@ public class RDP {
 
         // Se alamcenan los tokens que vienen como parametro en la variable global
         tokens = MatrixUtils.createRealVector(initialTokens);
+    }
+
+    /**
+     * Este método crea y devuelve un objeto de tipo Estadistica basado en la lista de listas de transiciones
+     * proporcionada como argumento.
+     *
+     * @param plazasTransiciones Lista de listas de transiciones para las que se creará la estadística
+     * @return Objeto Estadistica creado
+     */
+    public Estadistica crearEstadistica(List<List<Integer>> plazasTransiciones) {
+        // Se crea un nuevo objeto de tipo Estadistica con la lista de listas de transiciones proporcionada
+        this.estadistica = new Estadistica(plazasTransiciones);
+
+        // Se devuelve el objeto Estadistica creado
+        return this.estadistica;
     }
 
     /**
@@ -90,6 +106,9 @@ public class RDP {
 
             // Se setea el valor a retornar en true
             retval = true;
+
+            // Se llama al metodo para incrementar el contador de transiciones
+            this.estadistica.incrementarContador(transicion);
         }
         else {
             // Se setea el valor a retornar en false
