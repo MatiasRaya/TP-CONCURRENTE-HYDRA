@@ -5,8 +5,6 @@ import com.google.common.collect.Iterables;
 import org.hydra.beans.Segmento;
 import org.hydra.beans.VectorSensibilizado;
 
-import org.apache.log4j.Logger;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
