@@ -2,8 +2,6 @@ package org.hydra;
 
 import org.hydra.beans.Segmento;
 
-import org.apache.log4j.Logger;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -89,11 +87,8 @@ public class Inicializador {
             }
         }
         catch (InterruptedException e) {
-            // Se crea un elemento de la clase Logger
-            Logger logger = Logger.getLogger(Inicializador.class);
-
-            // Se almacena en el log que se produjo una excepcion al esperar los hilos
-            logger.error("Se produjo una excepción al esperar los hilos:", e);
+            // Se imprime el error
+            e.printStackTrace();
         }
 
         // Se imprime por consola que el hilo se interrumpio y los tokens de la red
