@@ -47,7 +47,7 @@ public class Politicas {
         // Se imprime por consola los disparos, los disponibles y el resultado
         System.out.println("Disparos: " + Arrays.toString(acciones));
         System.out.println("Disponible: " + transicionesDisponibles);
-        System.out.println("Resultado " + accionesPrivilegiadas);
+        System.out.println("Resultado: " + accionesPrivilegiadas);
 
         // Se retorna el primer disparo que cumpla la condicion
         return accionesPrivilegiadas.get(0);
