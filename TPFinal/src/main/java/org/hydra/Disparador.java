@@ -2,8 +2,6 @@ package org.hydra;
 
 import java.util.Iterator;
 
-import org.apache.log4j.Logger;
-
 /**
  * Clase que implementa la interfaz Runnable para realizar el disparo de transiciones y la realización de tareas
  * en la simulación de una Red de Petri.
@@ -58,12 +56,6 @@ public class Disparador implements Runnable {
             catch (RuntimeException e) {
                 //Se marca el hilo como interrumpido
                 this.estaInterrumpido = true;
-
-                // Se crea un elemento de la clase Logger
-                Logger logger = Logger.getLogger(Disparador.class);
-
-                // Se almacena en el log que se produjo una excepcion al tratar de realizar el disparo
-                logger.error("Se produjo una excepción al realizar el disparo de la transicion:", e);
             }
         }
     }
