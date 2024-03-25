@@ -19,7 +19,10 @@ public class ColaTransiciones extends Semaphore {
      * @param permitidos número de mutex permitidos
      */
     public ColaTransiciones(int transicion, int permitidos) {
+        // Se llama al constructor de la clase padre Semaphore
         super(permitidos);
+
+        // Se almacena el parametro transicion en la variable global
         this.transicion = transicion;
     }
 
@@ -31,10 +34,17 @@ public class ColaTransiciones extends Semaphore {
      */
     @Override
     public void acquire() throws InterruptedException {
+        // Se obtiene el nombre del hilo actual
         String hiloActual = Thread.currentThread().getName();
-        threads.add(hiloActual);
+
+        // Se agrega el nombre del hilo actual a la lista de hilos en espera
+        this.threads.add(hiloActual);
+
+        // Se llama al metodo acquire de la clase padre
         super.acquire();
-        threads.remove(Thread.currentThread().getName());
+
+        // Se elimina el nombre del hilo actual de la lista al ser despertado
+        this.threads.remove(Thread.currentThread().getName());
     }
 
     /**
@@ -42,6 +52,7 @@ public class ColaTransiciones extends Semaphore {
      */
     @Override
     public void release() {
+        // Se llama al metodo release de la clase padre
         super.release();
     }
 
@@ -52,7 +63,8 @@ public class ColaTransiciones extends Semaphore {
      */
     @Override
     public String toString() {
-        return  "T" + threads;
+        // Se devuelve una representacion en cadena de los hilos en espera
+        return  "T" + this.threads;
     }
 
     /**
@@ -61,7 +73,7 @@ public class ColaTransiciones extends Semaphore {
      * @return transicion
      */
     public int getTransicion() {
-        return transicion;
+        // Se devuelve la transicion asociada a esta cola
+        return this.transicion;
     }
-
 }
