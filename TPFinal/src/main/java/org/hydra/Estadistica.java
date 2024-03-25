@@ -1,5 +1,7 @@
 package org.hydra;
 
+import org.apache.log4j.Logger;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -88,7 +90,7 @@ public class Estadistica {
                 this.tInvariantesContador.merge(lista, 1, Integer::sum);
 
                 // Se verifica si se alcanzo el limite de transiciones
-                if (this.llegoTInvarianteLimite()) {
+                if (llegoTInvarianteLimite()) {
                     // Se sincroniza en el objeto notificador para realizar una notificación
                     synchronized (this.notificador) {
                         // Se notifica al objeto notificador
