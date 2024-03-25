@@ -21,8 +21,13 @@ public class Segmento {
      * @param nombre Nombre del segmento, representado con una letra mayúscula, "A","B",...
      */
     public Segmento(int nroHilo, Iterator<Integer> transiciones, String nombre) {
+        // Se almacena el parametro del numero de hilos en su repsectiva variable global
         this.nroHilo = nroHilo;
+
+        // Se almacena el parametro de transiciones en su repsectiva variable global
         this.transiciones = transiciones;
+
+        // Se almacena el parametro del nombre en su repsectiva variable global
         this.nombre = nombre;
     }
 
@@ -32,7 +37,8 @@ public class Segmento {
      * @return nroHilo
      */
     public int getNroHilo() {
-        return nroHilo;
+        // Se retorna la cantidad de hilos
+        return this.nroHilo;
     }
 
     /**
@@ -41,7 +47,8 @@ public class Segmento {
      * @return transiciones
      */
     public Iterator<Integer> getTransiciones() {
-        return transiciones;
+        // Se retornan las transiciones pertenecientes al segmento
+        return this.transiciones;
     }
 
     /**
@@ -51,7 +58,8 @@ public class Segmento {
      */
     @Override
     public String toString() {
-        return nombre;
+        // Se retorna el nombre del segmento
+        return this.nombre;
     }
 
 }
